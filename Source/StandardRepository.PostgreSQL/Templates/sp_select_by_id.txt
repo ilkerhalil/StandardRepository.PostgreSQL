@@ -1,0 +1,18 @@
+﻿CREATE OR REPLACE FUNCTION ##FULL_TABLE_NAME##_select_by_id
+(
+    prm_##TABLE_NAME##_id bigint	
+)
+RETURNS TABLE
+(
+##ALL_FIELDS_WITH_TYPE##
+)
+AS $$
+BEGIN
+
+    RETURN QUERY
+    SELECT  ##ALL_FIELDS_WITH_PREFIX##
+    FROM ##FULL_TABLE_NAME## t
+    WHERE t.##TABLE_NAME##_id = prm_##TABLE_NAME##_id AND t.is_deleted = false;
+
+END
+$$ LANGUAGE 'plpgsql';

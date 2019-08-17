@@ -1,0 +1,93 @@
+﻿FULL_TABLE_NAME										->  main.test_entity
+TABLE_NAME											->  test_entity
+
+SELF_FIELDS_WITH_PREFIX								->  prm_number_field,prm_other_number_field,prm_decimal_field,prm_decimal_null_field,prm_boolean_field,prm_text_field,prm_DateTime_field,prm_other_test_entity_id,prm_other_test_entity_uid,prm_other_test_entity_name
+														r.number_field,r.other_number_field,r.decimal_field,r.decimal_null_field,r.boolean_field,r.text_field,r.DateTime_field,r.other_test_entity_id,r.other_test_entity_uid,r.other_test_entity_name
+
+SELF_FIELDS_WITH_PREFIX_AND_TYPE					->  prm_number_field integer,
+														prm_other_number_field bigint,
+														prm_decimal_field numeric,
+														prm_decimal_null_field numeric,
+														prm_boolean_field boolean,
+														prm_text_field text,
+														prm_DateTime_field timestamp,
+														prm_other_test_entity_id bigint,
+														prm_other_test_entity_uid uuid,
+														prm_other_test_entity_name text,
+
+SELF_FIELDS_FOR_UPDATE								->  number_field = rev.number_field,
+														other_number_field = rev.other_number_field,
+														decimal_field = rev.decimal_field,
+														decimal_null_field = rev.decimal_null_field,
+														boolean_field = rev.boolean_field,
+														text_field = rev.text_field,
+														DateTime_field = rev.DateTime_field,
+														other_test_entity_name = rev.other_test_entity_name
+
+														number_field = prm_number_field,
+														other_number_field = prm_other_number_field,
+														decimal_field = prm_decimal_field,
+														decimal_null_field = prm_decimal_null_field,
+														boolean_field = prm_boolean_field,
+														text_field = prm_text_field,
+														DateTime_field = prm_DateTime_field,
+														other_test_entity_name = prm_other_test_entity_name
+
+ALL_FIELDS_EXCEPT_ID								->  test_entity_uid,test_entity_name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,DateTime_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,
+														created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted
+
+ALL_FIELDS_WITH_TYPE								->	test_entity_id bigint,
+														test_entity_uid uuid,
+														test_entity_name text,														
+														number_field integer,
+														other_number_field bigint,
+														decimal_field numeric,
+														decimal_null_field numeric,
+														boolean_field boolean,
+														text_field text,
+														DateTime_field timestamp,
+														other_test_entity_id bigint,
+														other_test_entity_uid uuid,
+														other_test_entity_name text,
+														created_by bigint,
+														created_at timestamp,
+														updated_by bigint,
+														updated_at timestamp,
+														deleted_by bigint,
+														deleted_at timestamp,
+														is_deleted boolean
+
+ALL_FIELDS_WITH_PREFIX								->  t.test_entity_id,t.test_entity_name,t.test_entity_uid,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted
+
+ALL_FIELDS_INCLUDING_REVISION_FIELDS				->  test_entity_id,test_entity_uid,test_entity_name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,DateTime_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted,
+														revision,revisioned_by,revisioned_at
+
+ALL_FIELDS_INCLUDING_REVISION_FIELDS_WITH_TYPE		->  test_entity_id bigint,
+														test_entity_uid uuid,
+														test_entity_name text,														
+														number_field integer,
+														other_number_field bigint,
+														decimal_field numeric,
+														decimal_null_field numeric,
+														boolean_field boolean,
+														text_field text,
+														DateTime_field timestamp,
+														other_test_entity_id bigint,
+														other_test_entity_uid uuid,
+														other_test_entity_name text,
+														created_by bigint,
+														created_at timestamp,
+														updated_by bigint,
+														updated_at timestamp,
+														deleted_by bigint,
+														deleted_at timestamp,
+														is_deleted boolean,
+														revision integer,
+														revisioned_by bigint,
+														revisioned_at timestamp
+
+ALL_FIELDS_INCLUDING_REVISION_FIELDS_WITH_PREFIX	-> t.test_entity_id,t.test_entity_uid,t.test_entity_name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted,t.revision,t.revisioned_by,t.revisioned_at
+
+
+RELATED_NAME_UPDATES								->
+

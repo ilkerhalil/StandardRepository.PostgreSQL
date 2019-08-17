@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Company>anatolia.solutions</Company>
+    <Authors />
+    <PackageProjectUrl>https://github.com/anatolia/standard-repository</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/anatolia/standard-repository</RepositoryUrl>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Description>a postresql data access layer which comes with record revision history and soft delete logic.</Description>
+    <Version>1.0.1.9</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Templates\sp_delete.txt" />
+    <None Remove="Templates\sp_hard_delete.txt" />
+    <None Remove="Templates\sp_insert.txt" />
+    <None Remove="Templates\sp_restore_revision.txt" />
+    <None Remove="Templates\sp_save_revision.txt" />
+    <None Remove="Templates\sp_select_by_id.txt" />
+    <None Remove="Templates\sp_select_revisions.txt" />
+    <None Remove="Templates\sp_undo_delete.txt" />
+    <None Remove="Templates\sp_update.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\sp_delete.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_hard_delete.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_insert.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_restore_revision.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_save_revision.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_select_by_id.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_select_revisions.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_undo_delete.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\sp_update.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="4.0.7" />
+    <PackageReference Include="StandardRepository" Version="1.0.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+</Project>

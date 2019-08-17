@@ -1,0 +1,15 @@
+﻿CREATE OR REPLACE PROCEDURE ##FULL_TABLE_NAME##_hard_delete
+(
+    prm_updated_by bigint,
+	prm_##TABLE_NAME##_id bigint
+)
+AS $$
+BEGIN
+
+    CALL ##FULL_TABLE_NAME##_save_revision (prm_updated_by,prm_##TABLE_NAME##_id);
+
+    DELETE FROM  ##FULL_TABLE_NAME##
+    WHERE ##TABLE_NAME##_id = prm_##TABLE_NAME##_id;
+
+END
+$$ LANGUAGE 'plpgsql';

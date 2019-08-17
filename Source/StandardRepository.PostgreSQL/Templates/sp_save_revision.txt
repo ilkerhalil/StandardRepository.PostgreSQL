@@ -1,0 +1,18 @@
+﻿CREATE OR REPLACE PROCEDURE ##FULL_TABLE_NAME##_save_revision
+(
+    prm_updated_by bigint,	
+	prm_##TABLE_NAME##_id bigint
+)
+AS $$
+BEGIN
+
+    INSERT INTO ##FULL_TABLE_NAME##_revision (##ALL_FIELDS_INCLUDING_REVISION_FIELDS##)
+    SELECT ##ALL_FIELDS_WITH_PREFIX##,
+           COALESCE((SELECT rev.revision FROM ##FULL_TABLE_NAME##_revision rev
+                     WHERE rev.##TABLE_NAME##_id = t.##TABLE_NAME##_id
+                     ORDER BY rev.revision desc limit 1), 0) + 1, prm_updated_by, now()
+    FROM ##FULL_TABLE_NAME## t
+    WHERE t.##TABLE_NAME##_id = prm_##TABLE_NAME##_id;
+
+END
+$$ LANGUAGE 'plpgsql';

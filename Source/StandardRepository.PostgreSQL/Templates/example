@@ -1,0 +1,276 @@
+﻿CREATE OR REPLACE FUNCTION main.test_entity_select_revisions
+(
+    prm_test_entity_id bigint	
+)
+RETURNS TABLE
+(
+    test_entity_id bigint,
+    test_entity_uid uuid,
+    test_entity_name text,
+    number_field integer,
+    other_number_field bigint,
+    decimal_field numeric,
+    decimal_null_field numeric,
+    boolean_field boolean,
+    text_field text,
+    DateTime_field timestamp,
+    other_test_entity_id bigint,
+    other_test_entity_uid uuid,
+    other_test_entity_name text,
+    created_by bigint,
+    created_at timestamp,
+    updated_by bigint,
+    updated_at timestamp,
+    deleted_by bigint,
+    deleted_at timestamp,
+    is_deleted boolean,
+    revision integer,
+    revisioned_by bigint,
+    revisioned_at timestamp
+)
+AS $$
+BEGIN
+
+    RETURN QUERY
+    SELECT  t.test_entity_id,t.test_entity_uid,t.test_entity_name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted,t.revision,t.revisioned_by,t.revisioned_at
+    FROM main.test_entity_revision t
+    WHERE t.test_entity_id = prm_test_entity_id AND t.is_deleted = false;
+
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE PROCEDURE main.test_entity_save_revision
+(
+    prm_updated_by bigint,	
+	prm_test_entity_id bigint
+)
+AS $$
+BEGIN
+
+    INSERT INTO main.test_entity_revision (test_entity_id,test_entity_uid,test_entity_name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,DateTime_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted,revision,revisioned_by,revisioned_at)
+    SELECT t.test_entity_id,t.test_entity_uid,t.test_entity_name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted,
+           COALESCE((SELECT rev.revision FROM main.test_entity_revision rev
+                     WHERE rev.test_entity_id = t.test_entity_id
+                     ORDER BY rev.revision desc limit 1), 0) + 1, prm_updated_by, now()
+    FROM main.test_entity t
+    WHERE t.test_entity_id = prm_test_entity_id;
+
+    COMMIT;
+
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE PROCEDURE main.test_entity_restore_revision
+(	
+	prm_updated_by bigint,	
+	prm_test_entity_id bigint,
+	prm_revision integer,
+	
+	INOUT exec_result integer
+)
+AS $$
+BEGIN	
+
+    SELECT revision INTO exec_result
+    FROM main.test_entity_revision
+    WHERE test_entity_id = prm_test_entity_id AND revision = prm_revision;
+    IF NOT FOUND THEN
+		exec_result := 0;
+		RAISE EXCEPTION 'revision not found!';
+    END IF;	
+
+	CALL main.test_entity_save_revision (prm_updated_by,prm_test_entity_id);
+
+    UPDATE main.test_entity
+    SET updated_by = prm_updated_by,
+        updated_at = now(),
+        test_entity_name = rev.test_entity_name,        
+    number_field = rev.number_field,
+    other_number_field = rev.other_number_field,
+    decimal_field = rev.decimal_field,
+    decimal_null_field = rev.decimal_null_field,
+    boolean_field = rev.boolean_field,
+    text_field = rev.text_field,
+    DateTime_field = rev.DateTime_field,
+    other_test_entity_id = rev.other_test_entity_id,
+    other_test_entity_uid = rev.other_test_entity_uid,
+    other_test_entity_name = rev.other_test_entity_name
+	FROM (SELECT  r.test_entity_uid,r.test_entity_name,r.number_field,r.other_number_field,r.decimal_field,r.decimal_null_field,r.boolean_field,r.text_field,r.DateTime_field,r.other_test_entity_id,r.other_test_entity_uid,r.other_test_entity_name,r.updated_by
+          FROM main.test_entity_revision r
+          WHERE r.test_entity_id = prm_test_entity_id AND r.revision = prm_revision
+          ) AS rev
+    WHERE test_entity_id = prm_test_entity_id;
+	
+
+	exec_result := 1;
+
+	COMMIT;
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION main.test_entity_insert
+(
+	OUT return_id bigint,
+
+    prm_updated_by bigint,
+	prm_uid uuid,
+	prm_name text,
+    prm_number_field integer,
+    prm_other_number_field bigint,
+    prm_decimal_field numeric,
+    prm_decimal_null_field numeric,
+    prm_boolean_field boolean,
+    prm_text_field text,
+    prm_DateTime_field timestamp,
+    prm_other_test_entity_id bigint,
+    prm_other_test_entity_uid uuid,
+    prm_other_test_entity_name text
+)
+AS $$
+BEGIN
+
+    INSERT INTO main.test_entity (test_entity_uid,name,number_field,other_number_field,decimal_field,decimal_null_field,boolean_field,text_field,DateTime_field,other_test_entity_id,other_test_entity_uid,other_test_entity_name,created_by,created_at,updated_by,updated_at,deleted_by,deleted_at,is_deleted)
+    VALUES (prm_uid,prm_name,prm_number_field,prm_other_number_field,prm_decimal_field,prm_decimal_null_field,prm_boolean_field,prm_text_field,prm_DateTime_field,prm_other_test_entity_id,prm_other_test_entity_uid,prm_other_test_entity_name,prm_updated_by,now(),null,null,null,null,false)
+    RETURNING test_entity_id
+    INTO return_id;
+
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE PROCEDURE main.test_entity_update
+(
+    prm_updated_by bigint,	
+	prm_test_entity_id bigint,
+	prm_name text,
+    prm_number_field integer,
+    prm_other_number_field bigint,
+    prm_decimal_field numeric,
+    prm_decimal_null_field numeric,
+    prm_boolean_field boolean,
+    prm_text_field text,
+    prm_DateTime_field timestamp,
+    prm_other_test_entity_id bigint,
+    prm_other_test_entity_uid uuid,
+    prm_other_test_entity_name text  
+)
+AS $$
+BEGIN
+
+	CALL main.test_entity_save_revision (prm_updated_by,prm_test_entity_id);
+
+    UPDATE main.test_entity
+    SET updated_by = prm_updated_by,
+        updated_at = now(),
+        ##TABLE_NAME##_name = prm_name,        
+    number_field = prm_number_field,
+    other_number_field = prm_other_number_field,
+    decimal_field = prm_decimal_field,
+    decimal_null_field = prm_decimal_null_field,
+    boolean_field = prm_boolean_field,
+    text_field = prm_text_field,
+    DateTime_field = prm_DateTime_field,
+    other_test_entity_id = prm_other_test_entity_id,
+    other_test_entity_uid = prm_other_test_entity_uid,
+    other_test_entity_name = prm_other_test_entity_name
+    WHERE test_entity_id = prm_test_entity_id;
+	
+
+    COMMIT;
+
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION main.test_entity_select_by_id
+(
+    prm_test_entity_id bigint	
+)
+RETURNS TABLE
+(
+    test_entity_id bigint,
+    test_entity_uid uuid,
+    test_entity_name text,
+    number_field integer,
+    other_number_field bigint,
+    decimal_field numeric,
+    decimal_null_field numeric,
+    boolean_field boolean,
+    text_field text,
+    DateTime_field timestamp,
+    other_test_entity_id bigint,
+    other_test_entity_uid uuid,
+    other_test_entity_name text,
+    created_by bigint,
+    created_at timestamp,
+    updated_by bigint,
+    updated_at timestamp,
+    deleted_by bigint,
+    deleted_at timestamp,
+    is_deleted boolean
+)
+AS $$
+BEGIN
+
+    RETURN QUERY
+    SELECT  t.test_entity_id,t.test_entity_uid,t.test_entity_name,t.number_field,t.other_number_field,t.decimal_field,t.decimal_null_field,t.boolean_field,t.text_field,t.DateTime_field,t.other_test_entity_id,t.other_test_entity_uid,t.other_test_entity_name,t.created_by,t.created_at,t.updated_by,t.updated_at,t.deleted_by,t.deleted_at,t.is_deleted
+    FROM main.test_entity t
+    WHERE t.test_entity_id = prm_test_entity_id AND t.is_deleted = false;
+
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE PROCEDURE main.test_entity_delete
+(
+    prm_updated_by bigint,
+	prm_test_entity_id bigint
+)
+AS $$
+BEGIN
+
+    CALL main.test_entity_save_revision (prm_updated_by,prm_test_entity_id);
+
+    UPDATE main.test_entity
+    SET deleted_by = prm_updated_by, deleted_at = null, is_deleted = true
+    WHERE test_entity_id = prm_test_entity_id;
+
+    COMMIT;
+
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE PROCEDURE main.test_entity_undo_delete
+(
+    prm_updated_by bigint,
+	prm_test_entity_id bigint
+)
+AS $$
+BEGIN
+
+    CALL main.test_entity_save_revision (prm_updated_by,prm_test_entity_id);
+
+    UPDATE main.test_entity
+    SET updated_by = prm_updated_by, updated_at = now(),
+        deleted_by = null, deleted_at = null, is_deleted = false
+    WHERE test_entity_id = prm_test_entity_id;
+
+    COMMIT;
+
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE PROCEDURE main.test_entity_hard_delete
+(
+    prm_updated_by bigint,
+	prm_test_entity_id bigint
+)
+AS $$
+BEGIN
+
+    CALL main.test_entity_save_revision (prm_updated_by,prm_test_entity_id);
+
+    DELETE FROM  main.test_entity
+    WHERE test_entity_id = prm_test_entity_id;
+
+    COMMIT;
+
+END
+$$ LANGUAGE 'plpgsql';

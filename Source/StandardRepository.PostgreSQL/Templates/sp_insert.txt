@@ -1,0 +1,19 @@
+﻿CREATE OR REPLACE FUNCTION ##FULL_TABLE_NAME##_insert
+(
+	OUT return_id bigint,
+
+    prm_updated_by bigint,
+	prm_uid uuid,
+	prm_name text,
+##SELF_FIELDS_WITH_PREFIX_AND_TYPE##
+)
+AS $$
+BEGIN
+
+    INSERT INTO ##FULL_TABLE_NAME## (##ALL_FIELDS_EXCEPT_ID##)
+    VALUES (prm_uid,prm_name,##SELF_FIELDS_WITH_PREFIX##,prm_updated_by,now(),null,null,null,null,false)
+    RETURNING ##TABLE_NAME##_id
+    INTO return_id;
+
+END
+$$ LANGUAGE 'plpgsql';

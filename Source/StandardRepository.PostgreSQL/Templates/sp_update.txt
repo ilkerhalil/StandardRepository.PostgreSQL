@@ -1,0 +1,23 @@
+﻿CREATE OR REPLACE PROCEDURE ##FULL_TABLE_NAME##_update
+(
+    prm_updated_by bigint,	
+	prm_##TABLE_NAME##_id bigint,
+	prm_name text,
+##SELF_FIELDS_WITH_PREFIX_AND_TYPE##  
+)
+AS $$
+BEGIN
+
+	CALL ##FULL_TABLE_NAME##_save_revision (prm_updated_by,prm_##TABLE_NAME##_id);
+
+    UPDATE ##FULL_TABLE_NAME##
+    SET updated_by = prm_updated_by,
+        updated_at = now(),
+        ##TABLE_NAME##_name = prm_name,        
+##SELF_FIELDS_FOR_UPDATE##
+    WHERE ##TABLE_NAME##_id = prm_##TABLE_NAME##_id;
+	
+##RELATED_NAME_UPDATES##
+
+END
+$$ LANGUAGE 'plpgsql';
