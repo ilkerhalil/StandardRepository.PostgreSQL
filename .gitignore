@@ -353,4 +353,5 @@ MigrationBackup/
 
 .idea/
 .vscode/
-coverage.opencover.xml
+covarage/
+

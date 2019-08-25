@@ -7,7 +7,8 @@ var solutionDir = System.IO.Directory.GetCurrentDirectory ();
 var artifactDir = Argument ("artifactDir", "./artifacts"); // ./build.sh --target Build-Container -artifactDir="somedir"
 var slnName = Argument ("slnName", "StandardRepository.PostgreSQL");
 string versionInfo = null;
-var coverageResultsFileName = "coverage.xml";
+
+var covarageDirectory="./covarage";
 
 
 Information (Figlet ("StandardRepository.PostgreSQL"));
@@ -84,8 +85,8 @@ Task ("Pack")
 Task("Run-Unit-Tests")
     .Does(() =>
 {
-	var covarageDirectoryPath = Directory("./covarage");
-	Information(covarageDirectoryPath.Path.FullPath);
+
+	
     var settings = new DotNetCoreTestSettings
     {
         Configuration = configuration,
@@ -93,10 +94,37 @@ Task("Run-Unit-Tests")
     }; 
     settings.ArgumentCustomization = args=> 
     args.Append("/p:CollectCoverage=true")
-	.Append($"/p:CoverletOutput={covarageDirectoryPath}/covarage-result.xml")
+	.Append("/p:Exclude=[StandardRepository.PostgreSQL.IntegrationTests.*]*")
+	.Append("/p:Exclude=[xunit.*]*")
+	.Append("/p:UseSourceLink=true")
+	.Append($"/p:CoverletOutput=../../{covarageDirectory}/covarage-result-for-unit-tests.xml")
     .Append("/p:CoverletOutputFormat=opencover");
     
     var files = GetFiles("./Tests/*.UnitTests/*.csproj");
+    foreach(var file in files){
+        DotNetCoreTest(file.FullPath,settings);
+    }
+});
+
+Task("Run-Integration-Tests")
+    .Does(() =>
+{
+
+	
+    var settings = new DotNetCoreTestSettings
+    {
+        Configuration = configuration,
+        NoBuild=true
+    }; 
+    settings.ArgumentCustomization = args=> 
+    args.Append("/p:CollectCoverage=true")
+	.Append("/p:Exclude=[StandardRepository.PostgreSQL.IntegrationTests.*]*")
+	.Append("/p:Exclude=[xunit.*]*")
+	.Append("/p:UseSourceLink=true")
+	.Append($"/p:CoverletOutput=../../{covarageDirectory}/covarage-result-for-integration-tests.xml")
+    .Append("/p:CoverletOutputFormat=opencover");
+    
+    var files = GetFiles("./Tests/*.IntegrationTests/*.csproj");
     foreach(var file in files){
         DotNetCoreTest(file.FullPath,settings);
     }
